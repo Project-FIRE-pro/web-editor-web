@@ -1,3 +1,5 @@
+import AdminRouter from './admin';
+
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 export interface RouteMeta {
@@ -17,6 +19,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'home',
     component: () => import('../views/the-home.vue')
   },
+
+  AdminRouter.routes,
+
+
+
 
   {
     path: '/:pathMatch(.*)*',
