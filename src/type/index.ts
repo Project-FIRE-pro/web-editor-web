@@ -1,0 +1,1 @@
+export { DomType } from './dom.type'

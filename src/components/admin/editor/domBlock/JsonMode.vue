@@ -1,6 +1,6 @@
 <template>
     <div>
-DomList
+JSON
     </div>
 </template>
 

@@ -1,6 +1,8 @@
 import AdminRouter from './admin';
 
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { useRouterHistoryStore } from '@/stores';
+
 
 export interface RouteMeta {
   name: string;
@@ -34,6 +36,19 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+
+
+const DEFAULT_TITLE = "編輯器"
+router.beforeResolve( to => {
+  window.document.title = `${DEFAULT_TITLE}${to.meta.title ? ' ' + to.meta.title : ''}`
+})
+
+router.beforeEach((to, from, next) => {
+  const routerStore = useRouterHistoryStore()
+  routerStore.updateHistory(from, to)
+  next()
 })
 
 export default router
