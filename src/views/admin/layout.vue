@@ -32,7 +32,7 @@
             bordered
         >
             <!-- drawer content -->
-            <q-scroll-area class="fit">
+            <q-scroll-area class="fit menu-area">
 
 
                 <q-list>
@@ -49,7 +49,7 @@
                                 default-opened
                                 :icon="routes.icon"
                                 :to="{ name: routes.routerName }"
-                                :active="currentRoute.name == routes.routerName"
+                                :active="route.name == routes.routerName"
                             >
                                 <template
                                     v-for="item in routes.childrenArray"
@@ -60,7 +60,7 @@
                                         :to="{ name: item.routerName }"
                                         exact
                                         clickable
-                                        :active="currentRoute.name == item.routerName"
+                                        :active="route.name == item.routerName"
                                     >
                                         <q-item-section avatar>
                                             <q-icon :name="item.icon" />
@@ -82,7 +82,7 @@
                                 :to="{ name: routes.routerName }"
                                 exact
                                 clickable
-                                :active="currentRoute.name == routes.routerName"
+                                :active="route.name == routes.routerName"
                             >
                                 <q-item-section avatar>
                                     <q-icon :name="routes.icon" />
@@ -101,11 +101,11 @@
 
         <q-page-container>
             <div
-                v-if="currentRoute.name == 'admin'"
+                v-if="route.name == 'admin'"
                 class="flex justify-center items-center h-[85vh]"
             >
                 這裡是後台管理，點擊旁邊的選項開始工作吧
-                {{ adminRoutes }}
+              
             </div>
             <router-view v-else />
         </q-page-container>
@@ -128,7 +128,7 @@ export default {
 import AdminRoutes from '@/router/admin'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-const currentRoute = useRoute()
+const route = useRoute()
 
 const adminRoutes = ref(AdminRoutes.routesMenu)
 
@@ -139,3 +139,11 @@ const toggleLeftDrawer = () => {
 
 </script>
 
+
+
+
+<style scoped>
+:deep() .menu-area  div.q-item.q-link{
+    display: none
+}
+</style>

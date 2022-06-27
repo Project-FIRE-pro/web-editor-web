@@ -50,7 +50,7 @@
                     <template v-slot:before>
                         <div class="mb-5 ">
                             <div class="mt-3 w-full text-gray-400 text-center">元件列表</div>
-                            <nested-draggable :elements="elements" />
+                            <nested-draggable v-if="elements" :elements="elements" />
                         </div>
                     </template>
 
@@ -58,10 +58,10 @@
                         <div>
 
                             <div class="mt-3 w-full text-gray-400 text-center">元件設定</div>
-                            <template v-if="elementEditor.editingElement && elements.length > 0">
+                            <template v-if="elementEditorStore.editingElement && elements && elements.length > 0">
                                 <component
-                                    :is='editorElementsObjWithComponents[elementEditor.editingElement.elementName].component'
-                                    :setting="elementEditor.editingElement.setting"
+                                    :is='editorElementsObjWithComponents[elementEditorStore.editingElement.elementName].component'
+                                    :setting="elementEditorStore.editingElement.setting"
                                     mode="edit"
                                 />
                             </template>
@@ -91,30 +91,31 @@ import NestedDraggable from '../elements/NestedDraggable.vue';
 </script>
 
 <script setup lang="ts">
-const elementEditor = useElementEditor()
+const elementEditorStore = useElementEditor()
 
 const editorElements = editorElementsArray
-const elements = ref<Array<{ elementName: string, setting: any }>>([])
+const elements = ref<Array<{ elementName: string, setting: any }> | null>(null)
 onMounted(() => {
-    if(elementEditor.elements.length>0){
-        console.log(1);
-        elements.value = elementEditor.elements
+    if (elementEditorStore.elements.length > 0) {
+        elements.value = elementEditorStore.elements
     }
 })
 watchEffect(() => {
-        if(elementEditor.elements.length>0 && elements.value.length==0){
-        console.log(1);
-        elements.value = elementEditor.elements
-    }else{
-        elementEditor.elements = elements.value
+    console.log("watchEffect");
+
+    if (elementEditorStore.elements.length > 0 && elements.value === null) {
+        elements.value = elementEditorStore.elements
+    } else if (elementEditorStore.elements.length != (elements.value ?? []).length) {
+        elementEditorStore.elements = elements.value ?? []
     }
 })
 const splitterModel = ref(20)
 const mainSplitterModel = ref(80)
 const addElement = (elementName: string) => {
-
-    elements.value.push({ elementName, setting: cloneDeep(editorElementsObjWithComponents[elementName].component.defaultSetting) })
-    elementEditor.editingElement = last(elements.value) ?? null
+    if (elements.value) {
+        elements.value.push({ elementName, setting: cloneDeep(editorElementsObjWithComponents[elementName].component.defaultSetting) })
+        elementEditorStore.editingElement = last(elements.value) ?? null
+    }
 }
 </script>
 

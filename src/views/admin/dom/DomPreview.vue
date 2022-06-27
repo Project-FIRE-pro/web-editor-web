@@ -32,7 +32,7 @@
             <div>
 
 
-                <pre class="prettyprint !p-3"><code class="language-basic">{{ elementEditor.data }}</code></pre>
+                <pre class="prettyprint !p-3"><code class="language-basic" v-html='hightLightKeyWord(elementEditor.data,`"key"`)'/></pre>
 
             </div>
 
@@ -92,6 +92,7 @@ import { ref } from 'vue';
 import { useScriptTag } from '@vueuse/core';
 import { designComponentsObj } from '@/components/design/autoRegisterDesignComponents'
 import { useRoute } from 'vue-router';
+import { isString } from 'lodash';
 const elementEditor = useElementEditor()
 useScriptTag('https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js',)
 const step = ref(1)
@@ -113,16 +114,45 @@ const demoCodeTemp = `<template>
 <1script1  lang="ts">
 const componentId = 'ComponentIdISHere'
 export default { componentId }
+import { cloneDeep, find, isArray, isString } from 'lodash';
 import { ref } from 'vue';
 </1script1>
 
 <1script1 setup lang="ts">
+type DatumType = {
+    isLoop?: boolean,
+    key: string,
+    value: string | Array<DatumType> | Array<Array<DatumType>>
+}
 interface Props {
-    data?: any,
+    data?: Array<DatumType>
 }
 const props = withDefaults(defineProps<Props>(), {
-    data: {}
-});
+    data: () =>
+    // 將Data匯入這裡 - 開始
+    // 將Data匯入這裡 - 結束
+})
+const findByKey = (data: Array<DatumType> | string, keys: Array<string>) => {
+    if (isString(data)) return data;
+    let _data = cloneDeep(data)
+    let lastdata = cloneDeep(data)
+    while (keys.length > 0 && _data != void 0) {
+        lastdata = cloneDeep(_data)
+        const key = keys.shift()
+        _data = find(_data, ['key', key])?.value as any
+        console.log(_data);
+    }
+    if (_data != void 0) {
+        lastdata = _data
+    }
+    if (isArray(lastdata)) {
+        return lastdata as unknown as Array<Array<DatumType>>
+    } else {
+        return lastdata as string
+    }
+
+}
+// 元件script - 開始
 
 </1script1>
 
@@ -130,6 +160,13 @@ const props = withDefaults(defineProps<Props>(), {
 </style>
 `.replaceAll('1script1', 'script').replaceAll('ComponentIdISHere', webComponentId.value)
 const component_data = designComponentsObj[webComponentId.value]
+
+const hightLightKeyWord = (org_text: any, keyword: string) => {
+    if(!isString(org_text)){
+        org_text = JSON.stringify(org_text, null, '\t')
+    }
+    return org_text.replaceAll(keyword, `<span style="background-color: #ffeb3b;color: #2f2c2c;font-size: larger;font-weight: bold;">${keyword}</span>`)
+}
 
 </script>
 

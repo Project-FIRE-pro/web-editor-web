@@ -3,7 +3,8 @@ export type DomType = {
     allowDomains: Array<string>,
     id: string,
     tags: Array<string>
+    elements: Array<any>
 }
 
 export type DomeEditor = {}
-export type DomEditorElement ={}
+export type DomEditorElement = {}

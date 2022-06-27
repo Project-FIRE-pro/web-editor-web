@@ -4,46 +4,47 @@
             :loading="loading"
             :grid="$q.screen.xs"
             title="Treats"
-            :rows="domTableParams.data"
-            :columns="domTableParams.columns"
+            :rows="siteTableParams.data"
+            :columns="siteTableParams.columns"
             row-key="id"
-            v-model:pagination="domTableParams.pagination"
+            v-model:pagination="siteTableParams.pagination"
             selection="multiple"
-            v-model:selected="domTableParams.selected"
-            :filter="domTableParams.filter"
-            @request="domTableParams.onRequest"
+            v-model:selected="siteTableParams.selected"
+            :filter="siteTableParams.filter"
+            @request="siteTableParams.onRequest"
             binary-state-sort
+            hide-bottom
         >
 
 
             <template v-slot:top>
 
 
-                <create-dom
+                <create-site
                     v-slot="{ handleShow }"
-                    @callback="getDoms"
+                    @callback="getSites"
                     :afterCreateAutoHide="true"
                 >
                     <q-btn
                         @click="handleShow()"
                         color="primary"
                         :disable="loading"
-                        label="增加元件"
+                        label="新增站點"
                     />
-                </create-dom>
+                </create-site>
                 <q-btn
-                    @click="deleteSelectedDoms()"
+                    @click="deleteSelectedSites()"
                     class="q-ml-sm"
                     color="negative"
                     :disable="loading"
-                    label="刪除所選元件"
+                    label="刪除所選站點"
                 />
                 <q-space />
                 <q-input
                     debounce="300"
                     color="primary"
                     label="關鍵字搜尋"
-                    v-model="domTableParams.filter"
+                    v-model="siteTableParams.filter"
                 >
                     <template v-slot:append>
                         <q-icon name="search" />
@@ -74,12 +75,13 @@
                     color="grey"
                     icon="text_snippet"
                     size="sm"
+                    @click="Dialog.create({ title: scope.row.showName, message: scope.row.note })"
                 >
-                    <q-tooltip>複製模板</q-tooltip>
+                    <q-tooltip>檢視備註</q-tooltip>
                 </q-btn>
 
 
-                <router-link :to="{ name: 'DomsItem', params: { id: scope.row.id } }">
+                <router-link :to="{ name: 'SitesItem', params: { site_id: scope.row.id } }">
                     <q-btn
                         class="ml-1"
                         :disable="loading"
@@ -97,13 +99,13 @@
             </template>
 
 
-            <template v-slot:body-cell-allowDomains="props">
+            <template v-slot:body-cell-domains="props">
                 <q-td :props="props">
                     <q-btn
                         dense
                         v-for="domain in (props.value)"
                         :key="domain"
-                        @click="domTableParams.filter = `domain:${domain}`"
+                        @click="siteTableParams.filter = `domain:${domain}`"
                         size="xs"
                         :label="domain"
                         color="blue"
@@ -113,20 +115,7 @@
             </template>
 
 
-            <template v-slot:body-cell-tags="props">
-                <q-td :props="props">
-                    <q-btn
-                        dense
-                        v-for="tag in (props.value)"
-                        :key="tag"
-                        @click="domTableParams.filter = `tag:${tag}`"
-                        size="xs"
-                        :label="tag"
-                        color="grey"
-                        class="ml-0.5"
-                    />
-                </q-td>
-            </template>
+
         </q-table>
 
     </div>
@@ -134,43 +123,41 @@
 <script  lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useNotify } from '@/composables/notify';
-import { DomType } from '@/type';
+import { SiteType } from '@/type';
 import { useRouterHistoryStore } from '@/stores';
 import { delay } from '@/api';
 
-import CreateDom from '@/components/admin/editor/dom/CreateDom.vue';
+import CreateSite from '@/components/admin/site/CreateSite.vue';
 import { db } from '@/common/firebase';
 import { useFirestore } from '@vueuse/firebase/useFirestore'
-import { useElementEditor } from '@/stores/elementEditor.store';
+import { useDialog } from '@/composables/dialog';
 
 </script>
 
 <script setup lang="ts">
-const DomsDB = db().collection('Doms');
+const SitesDB = db().collection('Sites');
 
 
 const Notify = useNotify()
-const elementEditorStore = useElementEditor()
+const Dialog = useDialog()
+const RouterHistory = useRouterHistoryStore()
 
 onMounted(() => {
-    // 取得Doms資料
-    getDoms()
-   elementEditorStore.dom=null
-   elementEditorStore.editingElement=null
-   elementEditorStore.elements=[]
+    // 取得Sites資料
+    getSites()
+    // 初始化 router history 用於麵包屑
+    RouterHistory.initHistory()
 })
 
 const loading = ref(false)
 
-// domTable 的參數
-const domTableParams = reactive({
+// siteTable 的參數
+const siteTableParams = reactive({
     columns: [
-        { name: 'showName', label: '元件名稱', field: 'showName' },
-        { name: 'allowDomains', label: '授權網域', field: 'allowDomains' },
-        { name: 'id', label: '元件ID', field: 'id' },
-        { name: 'tags', label: '元件標籤', field: 'tags' },
+        { name: 'showName', label: '站點名稱', field: 'showName' },
+        { name: 'domains', label: '授權網域', field: 'domains' },
     ],
-    data: [] as Array<DomType>,
+    data: [] as Array<SiteType>,
     selected: [],
     filter: '',
     pagination: {
@@ -185,46 +172,41 @@ const domTableParams = reactive({
         const filter = props.filter
         console.log(page, props.pagination);
 
-        getDoms(filter)
+        getSites(filter)
     }
 })
 
 
 
-// 取得Doms資料
-const getDoms = async (keyword?: string) => {
-    let _DomsDB = null
+// 取得Sites資料
+const getSites = async (keyword?: string) => {
+    let _SitesDB = null
     if (keyword) {
         if (keyword.indexOf('domain:') > -1) {
             keyword = keyword.replace('domain:', '')
-            _DomsDB = DomsDB.where('allowDomains', 'array-contains', keyword)
-        } else if (keyword.indexOf('tag:') > -1) {
-            keyword = keyword.replace('tag:', '')
-            _DomsDB = DomsDB.where('tags', 'array-contains', keyword)
+            _SitesDB = SitesDB.where('domains', 'array-contains', keyword)
         } else {
-            _DomsDB = DomsDB.where('showName', '>=', keyword)
+            _SitesDB = SitesDB.where('showName', '>=', keyword)
                 .where('showName', '<=', keyword + '\uf8ff')
         }
     }
-    console.log('_DomsDB', _DomsDB);
 
-    const doms = <Array<DomType>>(useFirestore(_DomsDB ?? DomsDB) as any)
+    const sites = <Array<SiteType>>(useFirestore(_SitesDB ?? SitesDB) as any)
     loading.value = true
-    domTableParams.data = doms
+    siteTableParams.data = sites
     loading.value = false
 
 }
 
 
-// 刪除Doms資料
-const deleteSelectedDoms = () => {
-    if (domTableParams.selected.length == 0) {
-        Notify.handleWarnings("請選擇要刪除的元件")
+// 刪除站點資料
+const deleteSelectedSites = () => {
+    if (siteTableParams.selected.length == 0) {
+        Notify.handleWarnings("請選擇要刪除的站點")
     }
-    const selectedWebComponentIds = domTableParams.selected.map(item => item['id'])
-    selectedWebComponentIds.forEach(id => {
-        DomsDB.doc(id).delete().then(() =>{
-            Notify.handleSuccess(`成功刪除${id}成功`)
+    siteTableParams.selected.forEach(site => {
+        SitesDB.doc(site['id']).delete().then(() => {
+            Notify.handleSuccess(`成功刪除「${site['showName']}」`)
         })
     });
 

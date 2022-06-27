@@ -65,18 +65,18 @@
     </div>
 </template>
 <script lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watchEffect } from 'vue';
 import { useNotify } from '@/composables/notify';
 import { delay } from '@/api';
-import { includes } from 'lodash';
+import { cloneDeep, includes } from 'lodash';
+import { useElementEditor } from '@/stores/elementEditor.store';
+import { db } from '@/common/firebase';
 </script>
 <script setup lang="ts">
 const Notify = useNotify()
-onMounted(() => {
-    // 取得Dom資料
-    getDom()
+const elementEditorStore = useElementEditor()
 
-})
+
 // 載入狀態
 const loading = ref(false)
 // 授權網域
@@ -94,14 +94,19 @@ const domDatum = reactive({
 // 取得Dom資料
 const getDom = async () => {
     loading.value = true
-    await delay(1.5)
-    domDatum.showName = '經典Banner1'
-    domDatum.allowDomains = ['ALL']
-    domDatum.id = 'WC-sdftGXR8_Z5jdHi6B-myT'
-    domDatum.tags = ['經典', 'Banner']
+    await delay(0.5)
+    domDatum.showName = elementEditorStore.dom?.showName ?? ''
+    domDatum.allowDomains = cloneDeep(elementEditorStore.dom?.allowDomains ?? [])
+    domDatum.id = elementEditorStore.dom?.id ?? ''
+    domDatum.tags = cloneDeep(elementEditorStore.dom?.tags ?? [])
     loading.value = false
-    chooseDomains.value=domainOptions.value.filter(item=>(includes(domDatum.allowDomains,item.value)))
+    chooseDomains.value = domainOptions.value.filter(item => (includes(domDatum.allowDomains, item.value)))
 }
+watchEffect(() => {
+    if (elementEditorStore.dom) {
+        getDom()
+    }
+})
 // 驗證表單是否正確
 const handleValidation = () => {
     if (domDatum.showName == '') {
@@ -120,9 +125,11 @@ const clickSave = async () => {
     if (!handleValidation()) return false;
     loading.value = true
     domDatum.allowDomains = chooseDomains.value.map((item) => (item.value))
-    await delay(1.5);
-    Notify.handleSuccess("更新成功")
-    console.log("要更新的Dom", domDatum);
+    db().collection('Doms').doc(domDatum.id).set(domDatum).then(() => {
+        Notify.handleSuccess("更新成功")
+    });
+    // await delay(1.5);
+    // console.log("要更新的Dom", domDatum);
     loading.value = false
 }
 

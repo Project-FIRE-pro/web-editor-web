@@ -14,7 +14,7 @@
         v-model="showDialog"
         @hide="handleHideDialog"
     >
-        <q-card>
+        <q-card class="min-w-[90vw] sm:min-w-[80vw] md:min-w-[50vw]">
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6">新增元件</div>
                 <q-space />
@@ -29,7 +29,6 @@
             <q-card-section>
 
                 <div class="q-gutter-y-md column   p-5 rounded-sm mx-auto">
-                    <h1 class="font-bold text-lg">元件ID：{{ domDatum.id }}</h1>
                     <q-input
                         v-model="domDatum.showName"
                         label="元件名稱"
@@ -104,6 +103,7 @@ import { reactive, ref } from 'vue';
 import { nanoid } from 'nanoid'
 import { useNotify } from '@/composables/notify';
 import { delay } from '@/api';
+import { db } from '@/common/firebase';
 </script>
 
 <script setup lang="ts">
@@ -120,13 +120,11 @@ const emit = defineEmits<{
     (e: 'callback'): void;
 }>();
 
-
+const DomsDB = db().collection('Doms');
 const Notify = useNotify()
 // 載入狀態
 const showDialog = ref(false)
 const loading = ref(false)
-// Dom Id
-const domId = `WC-${nanoid()}`
 
 // 授權網域
 const domainOptions = ref([{ value: 'ALL', label: '全部授權' }, { value: 'bgpower.com.tw', label: '背景模式' }]);
@@ -137,7 +135,6 @@ const domHashtagsOptions = ref<Array<string>>(['Classic', 'Banner']);
 const domDatum = reactive({
     showName: "",
     allowDomains: <Array<string>>[],
-    id: domId,
     tags: <Array<string>>[],
 })
 // 驗證表單是否正確
@@ -158,14 +155,17 @@ const clickCreate = async () => {
     if (!handleValidation()) return false;
     loading.value = true
     domDatum.allowDomains = chooseDomains.value.map((item) => (item.value))
-    await delay(1.5);
-    Notify.handleSuccess("新增成功")
-    console.log("要新增的Dom", domDatum);
-    loading.value = false
-    emit("callback");
-    if (props.afterCreateAutoHide) {
-        showDialog.value = false
-    }
+    // await delay(1.5);
+    // console.log("要新增的Dom", domDatum);
+    DomsDB.add(domDatum).then(() => {
+        Notify.handleSuccess("新增成功")
+        loading.value = false
+        emit("callback");
+        if (props.afterCreateAutoHide) {
+            showDialog.value = false
+        }
+    })
+
 }
 
 // 當關閉時
@@ -173,9 +173,7 @@ const handleHideDialog = () => {
     console.log('handleHideDialog');
     domDatum.showName = ""
     domDatum.allowDomains = <Array<string>>[]
-    domDatum.id = `WC-${nanoid()}`
     domDatum.tags = <Array<string>>[]
-
     chooseDomains.value.splice(0)
 }
 

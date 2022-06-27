@@ -1,3 +1,4 @@
+import { DomType } from '@/type';
 import { get, isArray, omit, has, chain } from 'lodash'
 import { defineStore } from 'pinia'
 
@@ -30,9 +31,9 @@ const formatData2User = (data: Array<any> | any): (Array<any> | any) => {
 
 }
 
-const formatData2Editor = (data: Array<any> | any): (Array<any> | any) => {
+const formatData2Preview = (data: Array<any> | any): (Array<any> | any) => {
     if (isArray(data)) {
-        return data.map((item: any) => (formatData2Editor(item)))
+        return data.map((item: any) => (formatData2Preview(item)))
     }
     if (get(data, 'elementName') == 'EBlock') {
         const isLoop = get(data, 'setting.isLoop')
@@ -40,36 +41,36 @@ const formatData2Editor = (data: Array<any> | any): (Array<any> | any) => {
         return isLoop
             ? {
                 isLoop: isLoop,
-                elementName: get(data, 'elementName'),
+                // elementName: get(data, 'elementName'),
                 key: get(data, 'setting.key'),
-                default: formatData2Editor(get(data, 'setting.value')),
-                value: [],
+                value: [formatData2Preview(get(data, 'setting.value'))],
             }
             : {
                 isLoop: isLoop,
-                elementName: get(data, 'elementName'),
+                // elementName: get(data, 'elementName'),
                 key: get(data, 'setting.key'),
-                value: formatData2Editor(get(data, 'setting.value')),
+                value: formatData2Preview(get(data, 'setting.value')),
             }
 
     }
     return {
-        elementName: get(data, 'elementName'),
+        // elementName: get(data, 'elementName'),
         key: get(data, 'setting.key'),
         value: get(data, 'setting.value'),
-        propsSet: get(data, 'setting.propsSet'),
+        // propsSet: get(data, 'setting.propsSet'),
     }
 
 }
 
 export const useElementEditor = defineStore('elementEditor', {
     state: () => ({
+        dom: <DomType | null>null,
         editingElement: <{ elementName: string, setting: any } | null>null,
         elements: <Array<{ elementName: string, setting: any }>>[]
     }),
     getters: {
         data(): string {
-            return formatData2User(this.elements)
+            return formatData2Preview(this.elements)
         },
 
     },
