@@ -135,7 +135,7 @@ const formatPageDomElements = (data: Array<any> | any): (Array<any> | any) => {
             name: get(data, 'setting.name'),
             key: get(data, 'setting.key'),
             value: get(data, 'setting.value'),
-            propsSet: get(data, 'setting.propsSet'),
+            propsSet: get(data, 'setting.propsSet')??'',
         }
 
     }

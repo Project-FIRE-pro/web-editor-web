@@ -21,7 +21,7 @@
                     </q-scroll-area>
 
                     <q-scroll-area class="h-24 flex-1 mb-2">
-                        <template v-for="e in elements">
+                        <template v-for="e in elementEditorStore.elements">
                             <component
                                 :is='editorElementsObjWithComponents[e.elementName].component'
                                 :setting="e.setting"
@@ -50,7 +50,10 @@
                     <template v-slot:before>
                         <div class="mb-5 ">
                             <div class="mt-3 w-full text-gray-400 text-center">元件列表</div>
-                            <nested-draggable v-if="elements" :elements="elements" />
+                            <nested-draggable
+                                v-if="elementEditorStore.elements"
+                                :elements="elementEditorStore.elements"
+                            />
                         </div>
                     </template>
 
@@ -58,7 +61,7 @@
                         <div>
 
                             <div class="mt-3 w-full text-gray-400 text-center">元件設定</div>
-                            <template v-if="elementEditorStore.editingElement && elements && elements.length > 0">
+                            <template v-if="elementEditorStore.editingElement && elementEditorStore.elements && elementEditorStore.elements.length > 0">
                                 <component
                                     :is='editorElementsObjWithComponents[elementEditorStore.editingElement.elementName].component'
                                     :setting="elementEditorStore.editingElement.setting"
@@ -94,27 +97,33 @@ import NestedDraggable from '../elements/NestedDraggable.vue';
 const elementEditorStore = useElementEditor()
 
 const editorElements = editorElementsArray
-const elements = ref<Array<{ elementName: string, setting: any }> | null>(null)
+// const elements = ref<Array<{ elementName: string, setting: any }> | null>(null)
 onMounted(() => {
-    if (elementEditorStore.elements.length > 0) {
-        elements.value = elementEditorStore.elements
-    }
+    if (!elementEditorStore.elements) {
+        elementEditorStore.elements = []
+        // elements.value = elementEditorStore.elements
+    } 
+    // else if (elementEditorStore.elements && elementEditorStore.elements.length > 0) {
+    //     elements.value = elementEditorStore.elements
+    // }
 })
 watchEffect(() => {
     console.log("watchEffect");
 
-    if (elementEditorStore.elements.length > 0 && elements.value === null) {
-        elements.value = elementEditorStore.elements
-    } else if (elementEditorStore.elements.length != (elements.value ?? []).length) {
-        elementEditorStore.elements = elements.value ?? []
-    }
+//     if (elements.value === null) {
+//         elements.value = elementEditorStore.elements
+
+//     }
+//   if (elementEditorStore.elements && elementEditorStore.elements.length != (elements.value ?? []).length) {
+//         elementEditorStore.elements = elements.value ?? []
+//     }
 })
 const splitterModel = ref(20)
 const mainSplitterModel = ref(80)
 const addElement = (elementName: string) => {
-    if (elements.value) {
-        elements.value.push({ elementName, setting: cloneDeep(editorElementsObjWithComponents[elementName].component.defaultSetting) })
-        elementEditorStore.editingElement = last(elements.value) ?? null
+    if (elementEditorStore.elements) {
+        elementEditorStore.elements.push({ elementName, setting: cloneDeep(editorElementsObjWithComponents[elementName].component.defaultSetting) })
+        elementEditorStore.editingElement = last(elementEditorStore.elements) ?? null
     }
 }
 </script>
