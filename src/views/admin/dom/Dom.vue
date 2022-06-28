@@ -34,7 +34,7 @@ const DomDB = db().collection('Doms').doc(route.params.id as string);
 const elementEditorStore = useElementEditor()
 elementEditorStore.dom = <DomType>(useFirestore(DomDB) as any)
 watchEffect(() => {
-    if (elementEditorStore.dom && elementEditorStore.elements.length == 0) {
+    if (elementEditorStore.dom && elementEditorStore.dom.elements && elementEditorStore.elements.length == 0) {
         elementEditorStore.elements = cloneDeep(elementEditorStore.dom.elements)
     }
 })
