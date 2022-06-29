@@ -105,9 +105,15 @@
                 class="flex justify-center items-center h-[85vh]"
             >
                 這裡是後台管理，點擊旁邊的選項開始工作吧
-              
+
             </div>
-            <router-view v-else />
+            <q-scroll-area
+                class="h-[calc(100vh-50px)]"
+                v-else
+            >
+                <router-view />
+            </q-scroll-area>
+
         </q-page-container>
 
     </q-layout>
@@ -143,7 +149,7 @@ const toggleLeftDrawer = () => {
 
 
 <style scoped>
-:deep() .menu-area  div.q-item.q-link{
+:deep() .menu-area div.q-item.q-link {
     display: none
 }
 </style>
