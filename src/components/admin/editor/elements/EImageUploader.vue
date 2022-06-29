@@ -9,21 +9,12 @@
 
 
                 <div class="shadow p-5 ">
-                    <q-file
-                        filled
-                        v-model="model"
-                        label="上傳圖片"
-                        accept="image/*"
-                        clearable
-                        @clear="mvalue = ''"
-                    >
-                        <template v-slot:prepend>
-                            <q-icon name="cloud_upload" />
-                        </template>
-                    </q-file>
-
                     <template v-if="mvalue">
-                        <q-img :src="mvalue" />
+                        <q-img
+                            class="w-56 h-auto"
+                            :src="mvalue"
+                        />
+                        <br>
                         <q-btn
                             class="mt-2"
                             @click="showEditDialog = true"
@@ -31,6 +22,12 @@
                             label="編輯圖片"
                         />
 
+                        <q-btn
+                            class="ml-2 mt-2"
+                            @click="mvalue = ''"
+                            color="red"
+                            label="刪除圖片"
+                        />
                         <!-- 圖片 編輯器 -->
                         <q-dialog
                             v-model="showEditDialog"
@@ -104,6 +101,21 @@
                         </q-dialog>
 
                     </template>
+
+                    <q-file
+                        v-else
+                        filled
+                        v-model="model"
+                        label="上傳圖片"
+                        accept="image/*"
+                        clearable
+                        @clear="mvalue = ''"
+                    >
+                        <template v-slot:prepend>
+                            <q-icon name="cloud_upload" />
+                        </template>
+                    </q-file>
+
 
 
 
