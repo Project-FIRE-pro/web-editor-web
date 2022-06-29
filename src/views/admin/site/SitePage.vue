@@ -1,5 +1,6 @@
 <template>
     <div class="p-5">
+
         <div class="flex gap-3 justify-between items-center">
             <q-breadcrumbs>
                 <q-breadcrumbs-el
@@ -12,6 +13,7 @@
                 />
                 <q-breadcrumbs-el :label="siteStore.pageData?.showName" />
             </q-breadcrumbs>
+
             <div class="flex gap-3">
                 <preview-page />
                 <edit-page after-edit-auto-hide />
@@ -23,9 +25,11 @@
             </div>
         </div>
 
+
+
         <div>
-            <template v-for="(dom, index) in pageDomsData">
-                <div class="relative pl-3">
+            <template v-for="(dom, index) in pageDomsData" :key="dom.id+`${index}`">
+                <div class="relative mx-5 pl-3">
                     <q-btn
                         @click="handleRemove(pageDomsData, index)"
                         class="absolute -left-[1rem] top-[1.3rem]"
@@ -34,7 +38,36 @@
                         icon="close"
                         round
                     >
-                        <q-tooltip>刪除第{{ index + 1 }}元件</q-tooltip>
+                        <q-tooltip
+                            anchor="center end"
+                            self="center left"
+                        >刪除第{{ index + 1 }}元件</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                        @click="handleMove(pageDomsData, index, 'up')"
+                        class="absolute -left-[1.2rem] top-[4rem]"
+                        size="xs"
+                        icon="expand_less"
+                        round
+                        flat
+                    >
+                        <q-tooltip
+                            anchor="center end"
+                            self="center left"
+                        >上移元件</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                        @click="handleMove(pageDomsData, index, 'down')"
+                        class="absolute -left-[1.2rem] top-[5.3rem]"
+                        size="xs"
+                        icon="keyboard_arrow_down"
+                        round
+                        flat
+                    >
+                        <q-tooltip
+                            anchor="center end"
+                            self="center left"
+                        >下移元件</q-tooltip>
                     </q-btn>
                     <template v-for="e in dom.data">
                         <component
@@ -135,7 +168,7 @@ const formatPageDomElements = (data: Array<any> | any): (Array<any> | any) => {
             name: get(data, 'setting.name'),
             key: get(data, 'setting.key'),
             value: get(data, 'setting.value'),
-            propsSet: get(data, 'setting.propsSet')??'',
+            propsSet: get(data, 'setting.propsSet') ?? '',
         }
 
     }
@@ -243,7 +276,14 @@ const handleRemove = async (data: Array<any>, index: number) => {
     }).onOk(() => {
         data.splice(index, 1)
     })
+}
 
+const handleMove = (data: Array<any>, index: number, action: string) => {
+    if (action == "up" && index >= 1) {
+        [data[index], data[index - 1]] = [data[index - 1], data[index]]
+    } else if (action == "down" && index + 1 < data.length) {
+        [data[index], data[index + 1]] = [data[index + 1], data[index]]
+    }
 }
 
 

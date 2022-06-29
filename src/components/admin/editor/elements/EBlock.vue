@@ -35,37 +35,56 @@
                 :style="{ height: scrollAreaHeight }"
                 class=" max-w-[100vw]"
             >
-                <div class="flex gap-3 ml-3 flex-nowrap">
-                    <div
-                        v-for="(item, index) in props.setting.value"
-                        class="relative mt-1 border rounded p-3 shadow"
-                    >
-                        <q-btn
-                            @click="handleRemove(props.setting.value, index)"
-                            class="absolute right-0 -top-[1px]"
-                            color="red"
-                            size="xs"
-                            icon="close"
-                            round
-                        >
-                            <q-tooltip>刪除第{{ index + 1 }}項</q-tooltip>
-                        </q-btn>
-
-                        <template v-for="e in item">
-                            <div class="min-w-[40vw]">
-                                <component
-                                    :mode="e.elementName == 'EBlock' ? 'show' : 'view'"
-                                    :is='editorElementsObjWithComponents[e.elementName].component'
-                                    :setting="e.setting"
-                                    v-model="e.setting.value"
-                                />
-                            </div>
-
-                        </template>
 
 
-                    </div>
-                </div>
+                <draggable
+                    v-model="props.setting.value"
+                    item-key="id"
+                    handle=".handle"
+                    class="flex gap-3 ml-3 flex-nowrap"
+                >
+                    <template #item="{ element, index }">
+                        <div class="relative mt-1 border rounded p-3 shadow ">
+                            <q-btn
+                                class="handle absolute -left-[3px] -top-[1px] bg-white"
+                                size="xs"
+                                icon="drag_handle"
+                                round
+                            >
+                                <q-tooltip>拖曳移動</q-tooltip>
+                            </q-btn>
+                            <q-btn
+                                @click="handleRemove(props.setting.value, index)"
+                                class="absolute right-0 -top-[1px]"
+                                color="red"
+                                size="xs"
+                                icon="close"
+                                round
+                            >
+                                <q-tooltip>刪除第{{ index + 1 }}項</q-tooltip>
+                            </q-btn>
+
+                            <template v-for="e in element">
+                                <div class="min-w-[40vw]">
+                                    <component
+                                        :mode="e.elementName == 'EBlock' ? 'show' : 'view'"
+                                        :is='editorElementsObjWithComponents[e.elementName].component'
+                                        :setting="e.setting"
+                                        v-model="e.setting.value"
+                                    />
+                                </div>
+
+                            </template>
+
+
+                        </div>
+                    </template>
+
+
+                </draggable>
+
+
+
             </q-scroll-area>
 
         </div>
@@ -111,6 +130,7 @@ import { useNotify } from '@/composables/notify';
 import { cloneDeep } from 'lodash';
 import { computed, ref, watchEffect } from 'vue';
 import { editorElementsObjWithComponents } from '../elements';
+import draggable from 'vuedraggable'
 
 export default {
     name: 'EBlock',
