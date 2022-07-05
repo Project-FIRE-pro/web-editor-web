@@ -13,9 +13,8 @@
     <q-dialog
         v-model="showDialog"
         @hide="handleHideDialog"
-       
     >
-        <q-card  class="min-w-[90vw] sm:min-w-[80vw] md:min-w-[50vw]">
+        <q-card class="min-w-[90vw] sm:min-w-[80vw] md:min-w-[50vw]">
             <q-card-section class="row items-center q-pb-none">
                 <div class="text-h6">新增頁面</div>
                 <q-space />
@@ -35,13 +34,22 @@
                         label="頁面名稱"
                         :rules="[val => !!val || '此欄位必填']"
                     />
-                  
-                             <q-input
+
+                    <q-input
                         v-model="pageDatum.url"
-                        label="頁面網址"
+                        label="頁面連結"
                         :rules="[val => !!val || '此欄位必填']"
                     />
 
+                    <q-toggle
+                        v-model="pageDatum.useCommonHeader"
+                        label="使用通用頁首"
+                    />
+
+                    <q-toggle
+                        v-model="pageDatum.useCommonFooter"
+                        label="使用通用頁尾"
+                    />
                     <q-btn
                         @click="clickCreate()"
                         color="primary"
@@ -101,6 +109,8 @@ const pageDefaultDatum = <PageType>{
     domsData: [],
     showName: "",
     url: "",
+    useCommonHeader: true,
+    useCommonFooter: true,
 }
 const pageDatum = reactive<PageType>(cloneDeep(pageDefaultDatum))
 // 驗證表單是否正確

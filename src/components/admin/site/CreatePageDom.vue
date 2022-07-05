@@ -93,6 +93,7 @@ import { designComponentsObj } from '@/components/design/autoRegisterDesignCompo
 // Props
 type Props = {
     afterCreateAutoHide?: boolean;
+    firestoreDB?: any;
 }
 const props = withDefaults(defineProps<Props>(), {
     afterCreateAutoHide: false,
@@ -106,7 +107,7 @@ const route = useRoute()
 const router = useRouter()
 const Notify = useNotify()
 const siteStore = useSiteStore()
-const PageDB = db().collection('Sites').doc(route.params.site_id as string).collection('Pages').doc(route.params.page_id as string);
+const PageDB = props.firestoreDB ? props.firestoreDB : db().collection('Sites').doc(route.params.site_id as string).collection('Pages').doc(route.params.page_id as string);
 const PageData = ref<PageType>()
 if (siteStore.siteData === null) {
     router.push({ name: 'SitesItem' })

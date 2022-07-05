@@ -13,6 +13,8 @@ export type PageType = {
     url: string;
     description?: string;
     note?: string;
+    useCommonHeader?:boolean;
+    useCommonFooter?:boolean;
 }
 
 export type PageDomData={

@@ -12,25 +12,29 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: {
-      name: 'home',
+      name: 'siteViewer',
     }
   },
 
-  {
-    path: `/home`,
-    name: 'home',
-    component: () => import('../views/the-home.vue')
-  },
+  // {
+  //   path: `/home`,
+  //   name: 'home',
+  //   component: () => import('../views/the-home.vue')
+  // },
 
   AdminRouter.routes,
 
-
-
-
   {
-    path: '/:pathMatch(.*)*',
-    redirect: '/'
+    path: `/:pathMatch(.*)*`,
+    name: 'siteViewer',
+    component: () => import('../views/SiteViewer.vue')
   },
+
+
+  // {
+  //   path: '/:pathMatch(.*)*',
+  //   redirect: '/'
+  // },
 ]
 
 const router = createRouter({

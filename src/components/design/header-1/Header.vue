@@ -23,7 +23,7 @@
                 :class="{ show: openMenu }"
             >
                 <div class="nav-menu">
-                    <template v-for="item in findByKey(props.data, ['navbarBlock']) ">
+                    <template v-for="item in (findByKey(props.data, ['navbarBlock']) as any) ">
                         <a
                             class="item"
                             :href="(findByKey(item, ['LinkBtn']) as string)"

@@ -21,7 +21,7 @@
 
                 </a>
                 <nav class="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center">
-                    <template v-for="item in findByKey(props.data, [ 'MenuBlock']) ">
+                    <template v-for="item in (findByKey(props.data, [ 'MenuBlock']) as any)">
 
                         <a
                             :href="(findByKey(item, ['Link']) as string)"

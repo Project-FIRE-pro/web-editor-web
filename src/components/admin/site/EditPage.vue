@@ -34,10 +34,20 @@
                         label="頁面名稱"
                         :rules="[val => !!val || '此欄位必填']"
                     />
+
                     <q-input
                         v-model="pageDatum.url"
                         label="頁面連結"
                         :rules="[val => !!val || '此欄位必填']"
+                    />
+                    <q-toggle
+                        v-model="pageDatum.useCommonHeader"
+                        label="使用通用頁首"
+                    />
+
+                    <q-toggle
+                        v-model="pageDatum.useCommonFooter"
+                        label="使用通用頁尾"
                     />
                     <q-input
                         v-model="pageDatum.description"
@@ -143,7 +153,7 @@ const resetDatum = (site: PageType) => {
 // 處理資料同步
 const siteStore = useSiteStore()
 watchEffect(() => {
-    if (siteStore.pageData && !dataUpdateLock.value) {
+    if (siteStore.pageData &&(!dataUpdateLock.value||!showDialog.value)) {
         resetDatum(siteStore.pageData)
         dataUpdateLock.value = true
     }

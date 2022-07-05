@@ -111,7 +111,7 @@
                 class="h-[calc(100vh-50px)]"
                 v-else
             >
-                <router-view />
+                <router-view :key="route.fullPath"/>
             </q-scroll-area>
 
         </q-page-container>

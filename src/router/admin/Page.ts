@@ -58,80 +58,62 @@ import { prefixRoutes } from '../menu'
 // 當menu有兩層時
 const routes: RouteRecordRaw =
 {
-    name: 'sites',
-    path: 'sites',
+    name: 'pages',
+    path: ':site_id',
     meta: {
-        title: '站點管理',
+        title: '頁面管理',
         icon: 'nature',
         showInMenu: true
     },
     component: () => import('@/views/admin/layoutWithoutMenu.vue'),
 
     redirect: {
-        name: 'ListSite',
+        name: 'SitePages',
     },
     children: [
-        {
-            name: 'ListSite',
-            path: '',
-            meta: {
-                title: '站點列表',
-                icon: 'auto_awesome_mosaic',
-                showInMenu: true
-            },
-            component: () => import('@/views/admin/site/ListSite.vue'),
-        },
+
+
 
         {
-            name: 'SitesItem',
-            path: ':site_id',
+            name: 'PageCommonHeader',
+            path: 'common/Header',
             meta: {
-                title: '站點資料',
+                title: '通用頁首',
                 icon: 'note_add',
                 showInMenu: true
             },
-            component: () => import('@/views/admin/site/Site.vue'),
+            component: () => import('@/views/admin/site/SiteCommon.vue'),
         },
-        // {
-        //     name: 'SiteItem',
-        //     path: ':id',
-        //     meta: {
-        //         title: '部落格管理',
-        //         icon: 'note_add',
-        //         showInMenu: true
-        //     },
-        //     component: () => import('@/views/admin/dom/Dom.vue'),
-        // },
-        // {
-        //     name: 'SiteItem',
-        //     path: ':id',
-        //     meta: {
-        //         title: '表單管理',
-        //         icon: 'note_add',
-        //         showInMenu: true
-        //     },
-        //     component: () => import('@/views/admin/dom/Dom.vue'),
-        // },
-        // {
-        //     name: 'SiteItem',
-        //     path: ':id',
-        //     meta: {
-        //         title: '電商管理',
-        //         icon: 'note_add',
-        //         showInMenu: true
-        //     },
-        //     component: () => import('@/views/admin/dom/Dom.vue'),
-        // },
-        // {
-        //     name: 'SiteItem',
-        //     path: ':id',
-        //     meta: {
-        //         title: '數據管理',
-        //         icon: 'note_add',
-        //         showInMenu: true
-        //     },
-        //     component: () => import('@/views/admin/dom/Dom.vue'),
-        // },
+        {
+            name: 'PageCommonFooter',
+            path: 'common/Footer',
+            meta: {
+                title: '通用頁尾',
+                icon: 'note_add',
+                showInMenu: true
+            },
+            component: () => import('@/views/admin/site/SiteCommon.vue'),
+        },
+        {
+            name: 'SitePages',
+            path: 'pages',
+            meta: {
+                title: '頁面列表',
+                icon: 'note_add',
+                showInMenu: true
+            },
+            component: () => import('@/views/admin/site/SiteListPage.vue'),
+        },
+        {
+            name: 'PageItem',
+            path: 'pages/:page_id',
+            meta: {
+                title: '頁面資料',
+                icon: 'note_add',
+                showInMenu: true
+            },
+            component: () => import('@/views/admin/site/SitePage.vue'),
+        },
     ]
 };
 

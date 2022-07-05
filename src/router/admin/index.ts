@@ -3,12 +3,14 @@ import { RouteRecordRaw } from 'vue-router'
 import { getRoutesMenu } from '../menu';
 import doms from "./Doms"
 import sites from "./Sites"
+import pages from "./Page"
 
 
 
 const routeChildren = [
     ...doms,
     sites,
+    pages
 ];
 
 const routes: RouteRecordRaw =
