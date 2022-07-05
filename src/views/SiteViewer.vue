@@ -1,10 +1,9 @@
 <template>
-    {{pageData.useCommonHeader?1:2}}
-    {{pageData.value.useCommonHeader?3:4}}
+  
     <div v-if="pageData">
         <!-- 通用頁首 -->
-        <template v-if="pageData?.useCommonHeader && CommonHeaderData && CommonHeaderData.domsData">
-            <template v-for="item in CommonHeaderData.domsData">
+        <template v-if="pageData.value.useCommonHeader && CommonHeaderData && CommonHeaderData.value.domsData">
+            <template v-for="item in CommonHeaderData.value.domsData">
                 <div v-if="designComponentsObj[item.id]">
                     <component
                         :is='designComponentsObj[item.id]'
@@ -14,7 +13,7 @@
             </template>
         </template>
         <!-- 頁面元件 -->
-        <template v-for="item in pageData?.domsData">
+        <template v-for="item in pageData.value.domsData">
             <div v-if="designComponentsObj[item.id]">
                 <component
                     :is='designComponentsObj[item.id]'
@@ -24,8 +23,8 @@
 
         </template>
         <!-- 通用頁尾 -->
-        <template v-if="pageData?.useCommonFooter && CommonFooterData && CommonFooterData.domsData">
-            <template v-for="item in CommonFooterData.domsData">
+        <template v-if="pageData.value.useCommonFooter && CommonFooterData && CommonFooterData.value.domsData">
+            <template v-for="item in CommonFooterData.value.domsData">
                 <div v-if="designComponentsObj[item.id]">
                     <component
                         :is='designComponentsObj[item.id]'
@@ -42,7 +41,7 @@ import { designComponentsObj } from '@/components/design/autoRegisterDesignCompo
 import { db } from '@/common/firebase';
 import { PageType } from '@/type';
 import { useFirestore } from '@vueuse/firebase/useFirestore';
-import { reactive, ref } from 'vue';
+import { reactive, ref, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 import firebase from 'firebase';
 import { computedAsync } from '@vueuse/core';
@@ -50,8 +49,9 @@ import { get, isArray, isString } from 'lodash';
 const route = useRoute()
 // const CommonHeaderData = ref<PageType>(useFirestore(db().collection('Sites').doc(route.params.site_id as string).collection('Commons').doc('Header')) as any)
 // const CommonFooterData = ref<PageType>(useFirestore(db().collection('Sites').doc(route.params.site_id as string).collection('Commons').doc('Footer')) as any)
+let siteSnapshotRef: firebase.firestore.DocumentReference | string = '';
 const getSiteDB = () => {
-    return new Promise<firebase.firestore.DocumentReference | string>(async (resolve, reject) => {
+    return siteSnapshotRef ? siteSnapshotRef : new Promise<firebase.firestore.DocumentReference | string>(async (resolve, reject) => {
         const siteQuerySnapshot = await db().collection('Sites').where('domains', 'array-contains', window.location.host).get()
         if (siteQuerySnapshot.empty) { resolve('siteQuerySnapshot is empty') }
         const siteSnapshot = siteQuerySnapshot.docs[0]  // use only the first document, but there could be more
@@ -63,47 +63,48 @@ const getSiteDB = () => {
     })
 
 }
+let pageSnapshotRef: firebase.firestore.DocumentReference | string = '';
 const getPageDB = () => {
-    return new Promise<firebase.firestore.DocumentReference | string>(async (resolve, reject) => {
-        const siteSnapshotRef = await getSiteDB()
+    return pageSnapshotRef ? pageSnapshotRef : new Promise<firebase.firestore.DocumentReference | string>(async (resolve, reject) => {
+        siteSnapshotRef = await getSiteDB()
         if (isString(siteSnapshotRef)) { resolve('siteQuerySnapshot is empty'); return null }
         const pageQuerySnapshot = await siteSnapshotRef.collection('Pages').where('url', '==', route.path).get()
         if (pageQuerySnapshot.empty) { resolve('pageQuerySnapshot is empty') }
         const pageSnapshot = pageQuerySnapshot.docs[0]
         resolve(pageSnapshot.ref)
     })
-
 }
+const pageData = computedAsync(
+    async () => {
+        pageSnapshotRef = await getPageDB()
+        console.log('PageDB', pageSnapshotRef);
+        if (isString(pageSnapshotRef)) {
+            return null
+        } else {
+            return ref<PageType>(useFirestore(pageSnapshotRef) as any)
+        }
+    },
+    null, // initial state
+)
 const CommonHeaderData = computedAsync(
     async () => {
         const SiteDB = await getSiteDB()
         if (isString(SiteDB)) {
             return null
         } else {
-            return <PageType>(useFirestore(SiteDB.collection('Commons').doc('Header'))?.value as any)
+            return ref<PageType>(useFirestore(SiteDB.collection('Commons').doc('Header')) as any)
         }
     },
     null, // initial state
 )
-const pageData = computedAsync(
-    async () => {
-        const PageDB = await getPageDB()
-        console.log('PageDB', PageDB);
-        if (isString(PageDB)) {
-            return null
-        } else {
-            return reactive<PageType>(useFirestore(PageDB) as any)
-        }
-    },
-    null, // initial state
-)
+
 const CommonFooterData = computedAsync(
     async () => {
         const SiteDB = await getSiteDB()
         if (isString(SiteDB)) {
             return null
         } else {
-            return <PageType>(useFirestore(SiteDB.collection('Commons').doc('Footer')).value as any)
+            return ref<PageType>(useFirestore(SiteDB.collection('Commons').doc('Footer')) as any)
         }
     },
     null, // initial state
