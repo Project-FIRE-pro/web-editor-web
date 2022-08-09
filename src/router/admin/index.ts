@@ -4,13 +4,14 @@ import { getRoutesMenu } from '../menu';
 import doms from "./Doms"
 import sites from "./Sites"
 import pages from "./Page"
-
+import posts from "./Post"
 
 
 const routeChildren = [
     ...doms,
     sites,
-    pages
+    pages,
+    posts
 ];
 
 const routes: RouteRecordRaw =
